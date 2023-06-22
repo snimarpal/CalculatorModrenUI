@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.button4, R.id.button5, R.id.button6, R.id.button7,
             R.id.button8, R.id.button9, R.id.buttonDot, R.id.buttonEquals,
             R.id.buttonAdd, R.id.buttonSubtract, R.id.buttonMultiply, R.id.buttonDivide,
-            R.id.buttonAC, R.id.buttonCE
+            R.id.buttonAC, R.id.buttonCE, R.id.buttonMod
         )
 
         for (buttonId in buttons) {
@@ -53,17 +53,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.buttonMultiply -> setOperator("*")
             R.id.buttonSubtract -> setOperator("-")
             R.id.buttonAdd -> setOperator("+")
+            R.id.buttonMod -> setOperator("%")
             R.id.buttonEquals -> calculateResult()
 
         }
     }
 
-    fun appendInput(value: String) {
+    private fun appendInput(value: String) {
         input.append(value)
         textViewInput.text = input.toString()
     }
 
-    fun clearInput() {
+    private fun clearInput() {
         input.clear()
         num1 = 0.0
         num2 = 0.0
@@ -72,14 +73,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         textViewResult.text = ""
     }
 
-    fun deleteLastInput() {
+    private fun deleteLastInput() {
         if (input.isNotEmpty()) {
             input.deleteAt(input.length - 1)
             textViewInput.text = input.toString()
         }
     }
 
-    fun setOperator(operator: String) {
+    private fun setOperator(operator: String) {
         if (input.isNotEmpty()) {
             num1 = input.toString().toDouble()
             this.operator = operator
@@ -88,28 +89,41 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    fun calculateResult() {
-        if (input.isNotEmpty() && operator != null) {
-            num2 = input.toString().toDouble()
-            var result = 0.0
+    private fun calculateResult() {
+        if (input.isNotEmpty() && operator != null && input.toString().contains(operator!!)) {
+            val inputWithoutOperator = input.toString().substringAfter(operator!!)
+            if (inputWithoutOperator.isNotEmpty()) {
+                num2 = inputWithoutOperator.toDouble()
+                var result = 0.0
 
-            when (operator) {
-                "+" -> result = num1 + num2
-                "-" -> result = num1 - num2
-                "*" -> result = num1 * num2
-                "/" -> {
-                    if (num2 != 0.0) {
-                        result = num1 / num2
-                    } else {
-                        textViewResult.text = "Error: Division by Zero"
-                        return
+                when (operator) {
+                    "+" -> result = num1 + num2
+                    "-" -> result = num1 - num2
+                    "*" -> result = num1 * num2
+                    "/" -> {
+                        if (num2 != 0.0) {
+                            result = num1 / num2
+                        } else {
+                            textViewResult.text = "Error: Division by Zero"
+                            return
+                        }
+                    }
+                    "%" -> {
+                        if (num2 != 0.0) {
+                            result = num1 % num2
+                        } else {
+                            textViewResult.text = "Error: Division by Zero"
+                            return
+                        }
                     }
                 }
-            }
 
-            textViewResult.text = result.toString()
-            clearInput()
-            num1 = result
+                textViewResult.text = result.toString()
+            } else {
+                textViewResult.text = "Invalid input"
+            }
+        } else {
+            textViewResult.text = "Invalid input"
         }
     }
 }

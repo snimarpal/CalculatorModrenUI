@@ -52,8 +52,9 @@
         </Button>
 
         <Button
-            style="@style/buttonNumber"
-            android:background="@null">
+            android:id="@+id/buttonMod"
+            style="@style/buttonOPeration"
+            android:text="%">
         </Button>
 
         <Button
