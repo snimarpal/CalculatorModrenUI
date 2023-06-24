@@ -6,15 +6,16 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import java.lang.StringBuilder
+import android.util.Log
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var textViewInput: TextView
     private lateinit var textViewResult: TextView
 
-    private var input: StringBuilder = StringBuilder()
-    private var num1: Double = 0.0
-    private var num2: Double = 0.0
-    private var operator: String? = null
+    var operandList = mutableListOf<Double>()
+    var operatorList = mutableListOf<String>()
+    var input : String? = null
+    var text : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,70 +61,93 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun appendInput(value: String) {
-        input.append(value)
-        textViewInput.text = input.toString()
+        if (input == null) {
+            input = value
+            if (text == null) {
+                text = value
+            } else {
+                text += value
+            }
+        } else {
+            input += value
+            text = textViewInput.text.toString() + value
+        }
+        textViewInput.text = text
+        textViewResult.text = null
+
+        // Print debug information
+        println("input: $input")
+        println("text: $text")
+        println("operandList: $operandList")
+        println("operatorList: $operatorList")
     }
 
     private fun clearInput() {
-        input.clear()
-        num1 = 0.0
-        num2 = 0.0
-        operator = null
-        textViewInput.text = ""
-        textViewResult.text = ""
+        text = null
+        input = null
+        operandList.clear()
+        operatorList.clear()
+        textViewInput.text = text
+        textViewResult.text = null
     }
 
     private fun deleteLastInput() {
-        if (input.isNotEmpty()) {
-            input.deleteAt(input.length - 1)
-            textViewInput.text = input.toString()
+        if (input != null) {
+            text = text?.dropLast(1)
+            if (input!!.count() == 1) {
+                input = null
+            } else {
+                input = input?.dropLast(1)
+            }
+            if (input == null && operandList.isNotEmpty()) {
+                operandList [operandList.lastIndex] /= 10.0
+                if (operandList.last() == 0.0) {
+                    operandList.removeLast()
+                }
+            } else {
+                operandList [operandList.lastIndex] = input!!.toDouble()
+            }
+        } else {
+            text = text?.dropLast(1)
+            if (operatorList.isNotEmpty()) {
+                operatorList.removeLast()
+            }
         }
+        textViewInput.text = text
+        textViewResult.text = null
     }
 
     private fun setOperator(operator: String) {
-        if (input.isNotEmpty()) {
-            num1 = input.toString().toDouble()
-            this.operator = operator
-            input.append(operator)
-            textViewInput.text = input.toString()
+        if (input != null) {
+            operandList.add(input!!.toDouble())
+            operatorList.add(operator)
+            text += operator
+            textViewInput.text = text
+            input = null
+        } else {
+            textViewResult.text = "invalid"
         }
+        textViewResult.text = null
+        println("input : " + input)
+        println("text : "+text)
+        println("operandList : "+operandList)
+        println("operatorList : "+operatorList)
     }
 
     private fun calculateResult() {
-        if (input.isNotEmpty() && operator != null && input.toString().contains(operator!!)) {
-            val inputWithoutOperator = input.toString().substringAfter(operator!!)
-            if (inputWithoutOperator.isNotEmpty()) {
-                num2 = inputWithoutOperator.toDouble()
-                var result = 0.0
-
-                when (operator) {
-                    "+" -> result = num1 + num2
-                    "-" -> result = num1 - num2
-                    "*" -> result = num1 * num2
-                    "/" -> {
-                        if (num2 != 0.0) {
-                            result = num1 / num2
-                        } else {
-                            textViewResult.text = "Error: Division by Zero"
-                            return
-                        }
-                    }
-                    "%" -> {
-                        if (num2 != 0.0) {
-                            result = num1 % num2
-                        } else {
-                            textViewResult.text = "Error: Division by Zero"
-                            return
-                        }
-                    }
+        var result:Double = 0.0
+        if (operandList.isNotEmpty()) {
+            result = operandList[0]
+            for (i in 1 until (operandList.count())) {
+                when (operatorList[i - 1]) {
+                    "+" -> result += operatorList[i+1].toDouble()
+                    "-" -> result -= operatorList[i+1].toDouble()
+                    "*" -> result *= operatorList[i+1].toDouble()
+                    "/" -> result /= operatorList[i+1].toDouble()
+                    "%" -> result %= operatorList[i+1].toDouble()
                 }
-
-                textViewResult.text = result.toString()
-            } else {
-                textViewResult.text = "Invalid input"
             }
-        } else {
-            textViewResult.text = "Invalid input"
         }
+        textViewResult.text = result.toString()
     }
 }
