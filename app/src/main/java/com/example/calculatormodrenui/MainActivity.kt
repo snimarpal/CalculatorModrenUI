@@ -1,21 +1,19 @@
 package com.example.calculatormodrenui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import java.lang.StringBuilder
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var textViewInput: TextView
     private lateinit var textViewResult: TextView
 
-    var operandList = mutableListOf<Double>()
-    var operatorList = mutableListOf<String>()
-    var input : String? = null
-    var text : String? = null
+    private var operandList = mutableListOf<Double>()
+    private var operatorList = mutableListOf<String>()
+    private var input : String? = null
+    private var text : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,23 +126,62 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             textViewResult.text = "invalid"
         }
         textViewResult.text = null
-        println("input : " + input)
-        println("text : "+text)
-        println("operandList : "+operandList)
-        println("operatorList : "+operatorList)
+        println("input : $input")
+        println("text : $text")
+        println("operandList : $operandList")
+        println("operatorList : $operatorList")
     }
 
     private fun calculateResult() {
-        var result:Double = 0.0
-        if (operandList.isNotEmpty()) {
-            result = operandList[0]
-            for (i in 1 until (operandList.count())) {
-                when (operatorList[i - 1]) {
-                    "+" -> result += operatorList[i+1].toDouble()
-                    "-" -> result -= operatorList[i+1].toDouble()
-                    "*" -> result *= operatorList[i+1].toDouble()
-                    "/" -> result /= operatorList[i+1].toDouble()
-                    "%" -> result %= operatorList[i+1].toDouble()
+        if (input != null) {
+            operandList.add(input!!.toDouble())
+            input = null
+        }
+
+        var result: Double = 0.0
+        var index = 0
+
+        for (i in 0 until operatorList.size) {
+            when (operatorList[i]) {
+                "+" -> {
+                    if (index == 0) {
+                        result = operandList[index] + operandList[index + 1]
+                    } else {
+                        result += operandList[index + 1]
+                    }
+                    index++
+                }
+                "-" -> {
+                    if (index == 0) {
+                        result = operandList[index] - operandList[index + 1]
+                    } else {
+                        result -= operandList[index + 1]
+                    }
+                    index++
+                }
+                "*" -> {
+                    if (index == 0) {
+                        result = operandList[index] * operandList[index + 1]
+                    } else {
+                        result *= operandList[index + 1]
+                    }
+                    index++
+                }
+                "/" -> {
+                    if (index == 0) {
+                        result = operandList[index] / operandList[index + 1]
+                    } else {
+                        result /= operandList[index + 1]
+                    }
+                    index++
+                }
+                "%" -> {
+                    if (index == 0) {
+                        result = operandList[index] % operandList[index + 1]
+                    } else {
+                        result %= operandList[index + 1]
+                    }
+                    index++
                 }
             }
         }
