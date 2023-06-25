@@ -1,9 +1,14 @@
 package com.example.calculatormodrenui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -35,6 +40,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         for (buttonId in buttons) {
             findViewById<Button>(buttonId).setOnClickListener(this)
         }
+
+        textViewInput.setOnLongClickListener {
+            copyTextToClipboard(textViewInput.text.toString())
+            true
+        }
+        textViewResult.setOnLongClickListener {
+            copyTextToClipboard(textViewResult.text.toString())
+            true
+        }
+    }
+
+    private fun copyTextToClipboard (text:String) {
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("text copied",text)
+        clipboardManager.setPrimaryClip(clipData)
+        Toast.makeText(this,"Text copied to Clipboard",Toast.LENGTH_SHORT).show()
     }
 
     override fun onClick(view: View) {
@@ -92,10 +113,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun deleteLastInput() {
         if (input != null) {
             text = text?.dropLast(1)
-            if (input!!.count() == 1) {
-                input = null
+            input = if (input!!.count() == 1) {
+                null
             } else {
-                input = input?.dropLast(1)
+                input?.dropLast(1)
             }
             if (input == null && operandList.isNotEmpty()) {
                 operandList [operandList.lastIndex] /= 10.0
@@ -115,6 +136,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         textViewResult.text = null
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setOperator(operator: String) {
         if (input != null) {
             operandList.add(input!!.toDouble())
@@ -138,14 +160,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             input = null
         }
 
-        var result: Double = 0.0
+        var result = 0.0
         var index = 0
 
         for (i in 0 until operatorList.size) {
             when (operatorList[i]) {
                 "+" -> {
                     if (index == 0) {
-                        result = operandList[index] + operandList[index + 1]
+                        result = operandList[index] + operandList[1]
                     } else {
                         result += operandList[index + 1]
                     }
@@ -153,7 +175,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 "-" -> {
                     if (index == 0) {
-                        result = operandList[index] - operandList[index + 1]
+                        result = operandList[index] - operandList[1]
                     } else {
                         result -= operandList[index + 1]
                     }
@@ -161,7 +183,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 "*" -> {
                     if (index == 0) {
-                        result = operandList[index] * operandList[index + 1]
+                        result = operandList[index] * operandList[1]
                     } else {
                         result *= operandList[index + 1]
                     }
@@ -169,7 +191,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 "/" -> {
                     if (index == 0) {
-                        result = operandList[index] / operandList[index + 1]
+                        result = operandList[index] / operandList[1]
                     } else {
                         result /= operandList[index + 1]
                     }
@@ -177,7 +199,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 "%" -> {
                     if (index == 0) {
-                        result = operandList[index] % operandList[index + 1]
+                        result = operandList[index] % operandList[1]
                     } else {
                         result %= operandList[index + 1]
                     }
